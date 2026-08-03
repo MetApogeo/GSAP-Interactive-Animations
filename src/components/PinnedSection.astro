@@ -10,12 +10,12 @@ const { sectionID } = Astro.props;
 >
   <div
     id={`curtainTop-${sectionID}`}
-    style="position: absolute; z-index:5; top:0; left:0; right:0; height:50%; background-image: url('/public/UXUI/CurtainTop.png'); background-size: cover; transform-origin: top; transform: scaleY(0);"
+    style="position: absolute; z-index:5; top:0; left:0; right:0; height:50%; background-image: url('/UXUI/CurtainTop.png'); background-size: cover; transform-origin: top; transform: scaleY(0);"
   >
   </div>
   <div
     id={`curtainBottom-${sectionID}`}
-    style="position: absolute; z-index:5; bottom: 0; left:0; right:0; height:54%; background-image: url('/public/UXUI/CurtainBot.png'); background-size: cover; transform-origin: bottom; transform: scaleY(0);"
+    style="position: absolute; z-index:5; bottom: 0; left:0; right:0; height:54%; background-image: url('/UXUI/CurtainBot.png'); background-size: cover; transform-origin: bottom; transform: scaleY(0);"
   >
   </div>
   <slot />
