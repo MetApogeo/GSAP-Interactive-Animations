@@ -1,0 +1,239 @@
+---
+import { champions } from "../data/champions.js";
+---
+
+<div class="detail">
+  <div class="detail-bg"></div>
+  <div class="detail-overlay"></div>
+  <img class="detail-character" id="championCharacter" src="" alt="" />
+
+  <div class="detail-content">
+    <h1 id="championName"></h1>
+    <h2 id="championRole"></h2>
+    <p id="championDescription"></p>
+  </div>
+</div>
+
+<div id="carrusel">
+  {
+    champions.map((champion, index) => (
+      <button class="champion-btn" data-id={champion.id} data-index={index}>
+        <img src={champion.thumbnail} alt={champion.name} />
+      </button>
+    ))
+  }
+</div>
+
+<script>
+  import { champions } from "../data/champions.js";
+  import gsap from "gsap";
+
+  let activeIndex = 0;
+  let previousActiveIndex = 0;
+
+  type Champion = {
+    id: string;
+    name: string;
+    role: string;
+    description: string;
+    thumbnail: string;
+    banner: string;
+    site: string;
+    character: string;
+  };
+
+  document.querySelectorAll(".champion-btn").forEach((btn) => {
+    const button = btn as HTMLButtonElement;
+    btn.addEventListener("click", () => {
+      const id = button.dataset.id;
+      const champion = champions.find((c) => c.id === id);
+      if (!champion) return;
+
+      previousActiveIndex = activeIndex;
+      activeIndex = Number(button.dataset.index);
+      positionCarousel();
+
+      updatePanel(champion);
+    });
+  });
+
+  function updatePanel(champion: Champion) {
+    const nameEl = document.getElementById("championName");
+    const roleEl = document.getElementById("championRole");
+    const descriptionEl = document.getElementById("championDescription");
+    const bgEl = document.querySelector(".detail-bg");
+    const charEl = document.getElementById("championCharacter");
+
+    if (!nameEl || !roleEl || !descriptionEl || !bgEl || !charEl) return;
+
+    gsap.to(bgEl, { opacity: 0, x: 20, duration: 0.3 });
+    gsap.to(nameEl, { opacity: 0, y: -20, duration: 0.25 });
+    gsap.to(roleEl, { opacity: 0, y: -20, duration: 0.05 });
+    gsap.to(charEl, { opacity: 0, x: 20, duration: 0.5 });
+
+    gsap.to(descriptionEl, {
+      opacity: 0,
+      y: -20,
+      duration: 0.45,
+      delay: 0.2,
+      onComplete: () => {
+        nameEl.textContent = champion.name;
+        roleEl.textContent = champion.role;
+        descriptionEl.textContent = champion.description;
+        (bgEl as HTMLElement).style.backgroundImage = `url(${champion.site})`;
+        (charEl as HTMLImageElement).src = champion.character;
+
+        gsap.to(bgEl, { opacity: 1, x: 0, duration: 0.4 });
+        gsap.to(nameEl, { opacity: 1, y: 0, duration: 0.4 });
+        gsap.to(roleEl, { opacity: 1, y: 0, duration: 0.4, delay: 0.05 });
+        gsap.to(descriptionEl, {
+          opacity: 1,
+          y: 0,
+          duration: 1.4,
+          delay: 0.1,
+        });
+        gsap.to(charEl, { opacity: 1, x: 0, duration: 0.4, delay: 0.1 });
+      },
+    });
+  }
+
+  function positionCarousel() {
+    const buttons = document.querySelectorAll(".champion-btn");
+    const step = 220;
+    const visible = getVisibleIndices(activeIndex, champions.length);
+
+    buttons.forEach((btn) => {
+      const button = btn as HTMLButtonElement;
+      const index = Number(button.dataset.index);
+      const isVisible = visible.includes(index);
+      const wasVisible = button.dataset.wasVisible == "true";
+
+      const diff = getCircularOffset(index, activeIndex, champions.length);
+
+      const offset = diff * step;
+
+      if (isVisible && wasVisible) {
+        const isActive = index === activeIndex;
+        gsap.to(button, {
+          x: offset,
+          xPercent: -50,
+          yPercent: isActive ? -120 : -100,
+          opacity: 1,
+          duration: 0.4,
+          scale: isActive ? 1.3 : 0.8,
+        });
+        gsap.to(button, {
+          pointerEvents: "auto",
+        });
+      } else if (isVisible && !wasVisible) {
+        const isActive = index === activeIndex;
+        gsap.set(button, {
+          x: offset,
+          xPercent: -50,
+          yPercent: isActive ? -120 : -100,
+          opacity: 0,
+          scale: 0.6,
+          pointerEvents: "auto",
+        });
+        gsap.to(button, {
+          opacity: 1,
+          scale: isActive ? 1.3 : 0.8,
+          duration: 0.7,
+        });
+      } else if (!isVisible && wasVisible) {
+        gsap.to(button, { opacity: 0, scale: 0.5, duration: 0.3 });
+        gsap.set(button, { pointerEvents: "none" });
+        return;
+      } else {
+        gsap.set(button, { opacity: 0, pointerEvents: "none" });
+      }
+
+      button.dataset.wasVisible = isVisible ? "true" : "false";
+    });
+  }
+
+  function getCircularOffset(
+    index: number,
+    activeIndex: number,
+    length: number,
+  ) {
+    let diff = index - activeIndex;
+
+    if (diff > length / 2) {
+      diff -= length;
+    } else if (diff < -length / 2) {
+      diff += length;
+    }
+
+    return diff;
+  }
+
+  function getVisibleIndices(activeIndex: number, length: number) {
+    const prevIndex = (activeIndex - 1 + length) % length;
+    const nextIndex = (activeIndex + 1) % length;
+    return [activeIndex, prevIndex, nextIndex];
+  }
+
+  updatePanel(champions[0]);
+  positionCarousel();
+</script>
+
+<style>
+  .detail {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  .detail-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 2;
+  }
+
+  .detail-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+  }
+
+  .detail-content {
+    position: relative;
+    z-index: 3;
+    color: white;
+    text-align: center;
+  }
+
+  .champion-btn {
+    border-radius: 50%;
+    border: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    background: none;
+    z-index: 3;
+  }
+
+  #carrusel {
+    position: relative;
+  }
+
+  .detail-character {
+    position: absolute;
+    right: 0;
+    height: 100%;
+    width: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+const { sectionID } = Astro.props;
+---
+
+<!-- * Pin Section -->
+<section
+  id={sectionID}
+  class="pinned-section"
+  style="position: relative; height: 100vh;"
+>
+  <div
+    id={`curtainTop-${sectionID}`}
+    style="position: absolute; z-index:5; top:0; left:0; right:0; height:50%; background-image: url('/public/UXUI/CurtainTop.png'); background-size: cover; transform-origin: top; transform: scaleY(0);"
+  >
+  </div>
+  <div
+    id={`curtainBottom-${sectionID}`}
+    style="position: absolute; z-index:5; bottom: 0; left:0; right:0; height:54%; background-image: url('/public/UXUI/CurtainBot.png'); background-size: cover; transform-origin: bottom; transform: scaleY(0);"
+  >
+  </div>
+  <slot />
+</section>
+
+<script>
+  import gsap from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+  gsap.registerPlugin(ScrollTrigger);
+
+  const secciones = document.querySelectorAll(".pinned-section");
+
+  secciones.forEach((section) => {
+    const curtainTop = section.querySelector('[id^="curtainTop"]');
+    const curtainBottom = section.querySelector('[id^="curtainBottom"]');
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: "+=1000",
+        pin: true,
+        scrub: 1,
+      },
+    });
+
+    gsap.set([curtainTop, curtainBottom], { scaleY: 1 });
+
+    tl.to([curtainTop, curtainBottom], { scaleY: 0, duration: 0.2 }, 0);
+    tl.to([curtainTop, curtainBottom], { scaleY: 1, duration: 0.2 }, 0.8);
+  });
+</script>
