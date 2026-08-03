@@ -4,7 +4,7 @@ Demo técnico de un patrón de landing page tipo "cinematic scroll" (el mismo es
 
 > Proyecto de práctica / fan demo. No afiliado a Riot Games. Todos los assets de League of Legends pertenecen a Riot Games; se usan aquí solo con fines demostrativos y no comerciales.
 
-**[Ver demo en vivo →](  )**
+**[Ver demo en vivo →](https://gsap-interactive-animations.vercel.app/)**
 
 ---
 
@@ -29,15 +29,19 @@ El proyecto es ~90% contenido presentacional (scroll storytelling) y ~10% intera
 ## Técnicas destacadas
 
 ### 1. Pin + scrub como mecanismo de transición
+
 Cada sección usa un único `ScrollTrigger` con `pin: true` y un timeline `scrub`-eado. El scroll del usuario no dispara la animación — la **controla directamente**, como el scrubber de un reproductor de video. El "corte" entre escenas ocurre en el punto de máxima cobertura del telón, donde se cambia el contenido de forma instantánea (`gsap.set`) mientras está oculto, evitando cualquier salto visible.
 
 ### 2. Distancia circular para el carrusel
+
 En vez de posicionar los botones del carrusel a mano, cada uno calcula su offset como `(índice - índiceActivo)`, corregido para tomar siempre el camino más corto alrededor del array (como las horas de un reloj). Esto permite cualquier cantidad de campeones sin lógica especial en los extremos.
 
 ### 3. Ventana deslizante (windowing)
+
 Solo se mantienen 3 botones visibles en todo momento (anterior / activo / siguiente), independientemente de cuántos campeones tenga el dataset. Los que entran/salen de la ventana lo hacen con fade + scale, y se les desactiva `pointer-events` mientras están ocultos para que no intercepten clicks fantasma.
 
 ### 4. Componentización con slots
+
 `PinnedSection.astro` no sabe nada sobre su contenido — solo maneja pin + telón, y expone un `<slot />` genérico. `ChampionSelector.astro` vive anidado adentro sin acoplarse a la lógica de scroll. Los ids internos se generan dinámicamente (`` `curtainTop-${sectionID}` ``) para permitir múltiples instancias en la misma página sin colisiones.
 
 ## Estructura del proyecto
